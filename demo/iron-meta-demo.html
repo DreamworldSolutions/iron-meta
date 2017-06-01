@@ -1,0 +1,145 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../iron-meta.html">
+<link rel="import" href="../../paper-styles/demo-pages.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html" />
+<link rel="import" href="../../paper-card/paper-card.html" />
+<dom-module id="iron-meta-demo">
+  <template>
+    <style include="iron-flex">
+      paper-card{
+        width:500px;
+        padding:15px;
+        margin:15px;
+      }
+    </style>
+    <div class="layout vertical center iron-flex-alignment">
+      <paper-card>
+        <h1>&lt;iron-meta&gt;</h1>
+        <h2>Key Query</h2>
+
+        <iron-meta key="info" value='[[metaValue1]]'></iron-meta>
+        <iron-meta-query key="info" value="{{metaQueryValue1}}"></iron-meta-query>
+
+        The value stored at key="info" is <b>[[metaQueryValue1]]</b>.
+      </paper-card>
+
+      <paper-card>
+        <h2>Type Query</h2>
+        <iron-meta type="type1" key="a" value="[[metaValue2]]"></iron-meta>
+        <iron-meta-query type="type1" key="a" value="{{metaQueryValue2}}"></iron-meta-query>
+
+        <iron-meta type="type2" key="b" value="[[metaValue3]]"></iron-meta>
+        <iron-meta-query type="type2" key="b" value="{{metaQueryValue3}}"></iron-meta-query>
+
+        The value(s) stored at type="type1" are: <b>[[metaQueryValue2]]</b>.
+        <br><br>
+        The value(s) stored at type="type2" are: <b>[[metaQueryValue3]]</b>.
+      </paper-card>
+
+      <paper-card>
+        <h2>Imperative Way in Attached</h2>
+        <iron-meta type="type3" key="d" value="[[metaValue5]]"></iron-meta>
+        The value(s) stored at key="d" are: <b>[[metaQueryValue5]]</b>.
+      </paper-card>
+    </div>
+
+
+
+  </template>
+</dom-module>
+
+<script>
+
+  (function() {
+
+    Polymer({
+
+      is: 'iron-meta-demo',
+
+      properties: {
+        "metaValue1": {
+          type: Object,
+          value: function(){
+            return {'name':'nirmal'};
+          }
+        },
+
+        "metaValue2": {
+          type: String,
+          value: "Polymer"
+        },
+
+        "metaValue3": {
+          type: String,
+          value: 'Framework'
+        },
+
+        "metaValue4": {
+          type: Object,
+          value: function(){
+            return {};
+          }
+        },
+
+        "metaValue5": {
+          type: String,
+          value: 'POlymer Framweork 2'
+        },
+
+        "metaQueryValue1": Object,
+
+        "metaQueryValue2": String,
+
+        "metaQueryValue3": String,
+
+        "metaQueryValue4": Object,
+
+        "metaQueryValue5": String
+      },
+
+      observers: ['_onChange(metaQueryValue1.*)'],
+
+      _onChange: function(e){
+        console.log('Key Query Changed', e);
+      },
+
+      registered: function(){
+        var elMetaQuery4 = new Polymer.IronMetaQuery();
+        document.querySelector('body').appendChild(elMetaQuery4);
+
+        elMetaQuery4.set('key', 'c');
+        console.log('Initial', elMetaQuery4.value);
+
+
+        elMetaQuery4.addEventListener('value-changed', function(){
+          console.log('change imperative', elMetaQuery4.value);
+        });
+      },
+
+      attached: function(){
+        var self = this;
+        var elMetaQuery5 = document.createElement('iron-meta-query');
+        this.appendChild(elMetaQuery5);
+        elMetaQuery5.set('type', 'type3');
+        elMetaQuery5.set('key', 'd');
+        console.log('Initial', elMetaQuery5.value);
+        self.set('metaQueryValue5',elMetaQuery5.value);
+
+        elMetaQuery5.addEventListener('value-changed', function(){
+          self.set('metaQueryValue5',elMetaQuery5.value);
+          console.log('change imperative', elMetaQuery5.value);
+        });
+      }
+    });
+  })();
+</script>

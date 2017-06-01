@@ -89,7 +89,7 @@ Or, in a Polymer element, you can include a meta in your template:
          * The meta-data to store or retrieve.
          */
         value: {
-          type: Object,
+          type: String,
           notify: true,
           observer: '_valueChanged'
         },
@@ -126,22 +126,13 @@ Or, in a Polymer element, you can include a meta in your template:
           var isSplices = false;
           var path = change.path;
           
-          if (change.path.match(".splices$")) {
-            isSplices = true;
-            path = path.replace(/.splices$/, '');
-          }
-          
           for(index = 0; index < queries.length; index++){
             if((isSplices && queries[index].value !== change.base)
                 || (!isSplices && path === 'value' && queries[index].value !== change.value)){
               queries[index]._setValue(change.value);
               continue;
             }
-            if(!isSplices){
-                queries[index].notifyPath(path, change.value);
-            } else {
-              queries[index].notifySplices(path, change.value.indexSplices);
-            }
+            queries[index].notifyPath(path, change.value);
           }
         }
         
