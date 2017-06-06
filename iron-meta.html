@@ -55,13 +55,70 @@ Or, in a Polymer element, you can include a meta in your template:
 
   (function() {
 
+
+
+
+    function IronMeta(options) {
+      this.type = (options && options.type) || 'default';
+      this.key = options && options.key;
+      if ('value' in options) {
+        this.value = options.value;
+      }
+    }
+
+    IronMeta.types = {};
+
+    IronMeta.prototype = {
+      get value() {
+        var type = this.type;
+        var key = this.key;
+
+        if (type && key) {
+          return IronMeta.types[type] && IronMeta.types[type][key];
+        }
+      },
+
+      set value(value) {
+        var type = this.type;
+        var key = this.key;
+
+        if (type && key) {
+          var type = IronMeta.types[type] = IronMeta.types[type] || {};
+          if (value == null) {
+            delete type[key];
+          } else {
+            type[key] = value;
+          }
+        }
+      },
+
+      get list() {
+        var type = this.type;
+
+        if (type) {
+          return Object.keys(IronMeta.types[this.type]).map(function(key) {
+            return metaDatas[this.type][key];
+          }, this);
+        }
+      },
+
+      byKey(key) {
+        this.key = key;
+        return this.value;
+      }
+    };
+
+    Polymer.IronMeta = IronMeta;
+
+    var metaDatas = Polymer.IronMeta.types;
     // monostate data
-    var metaDatas = {};
     var metaArrays = {};
     var metaQueryElements = {};
     var singleton = null;
 
-    Polymer.IronMeta = Polymer({
+
+
+    Polymer({
 
       is: 'iron-meta',
 
@@ -117,15 +174,15 @@ Or, in a Polymer element, you can include a meta in your template:
       },
 
       observers : ['_onValueChange(value.*)'],
-      
+
       _onValueChange : function(change){
         var index;
-        
+
         if(metaQueryElements[this.type] && metaQueryElements[this.type][this.key]){
           var queries = metaQueryElements[this.type][this.key];
           var isSplices = false;
           var path = change.path;
-          
+
           for(index = 0; index < queries.length; index++){
             if((isSplices && queries[index].value !== change.base)
                 || (!isSplices && path === 'value' && queries[index].value !== change.value)){
@@ -135,14 +192,14 @@ Or, in a Polymer element, you can include a meta in your template:
             queries[index].notifyPath(path, change.value);
           }
         }
-        
+
       },
-      
+
       _setQueriesValues : function(type, key, value){
         if(metaQueryElements[type] && metaQueryElements[type][key]){
           var queries = metaQueryElements[type][key];
           var index;
-          
+
           for(index = 0; index < queries.length; index++){
               queries[index]._setValue(value);
             }
@@ -213,7 +270,7 @@ Or, in a Polymer element, you can include a meta in your template:
        * @return {*}
        */
       byKey: function(key) {
-        return this._metaData && this._metaData[key];
+        return this._metaDatas && this._metaDatas[this.type] && this._metaDatas[this.type][key];
       },
 
       _resetRegistration: function(oldKey) {
@@ -336,13 +393,13 @@ Or, in a Polymer element, you can include a meta in your template:
           }
         }
       },
-      
+
       created: function() {
         // TODO(sjmiles): good for debugging?
         this._metaDatas = metaDatas;
         this._metaArrays = metaArrays;
       },
-      
+
       attached: function() {
         //When detached instance is re-attached again.
         if(this._detached){
@@ -351,7 +408,7 @@ Or, in a Polymer element, you can include a meta in your template:
           this._registerElement(this.type, this.key);
         }
       },
-      
+
       detached: function() {
         this._detached = true;
         this._unregisterElement(this.type, this.key);
@@ -361,25 +418,25 @@ Or, in a Polymer element, you can include a meta in your template:
           this._unregisterElement(this.type, oldKey);
           this._registerElement(this.type, newKey);
        },
-      
+
       _registerElement:function(type, key) {
-        
+
         if(!type || !key){
           return;
         }
-        
+
         if (!metaQueryElements[type]) {
           metaQueryElements[type] = {};
         }
-        
+
         if(!metaQueryElements[type][key]){
           metaQueryElements[type][key] = [];
         }
-        
+
         metaQueryElements[type][key].push(this);
         this._setValue(this._metaData && this._metaData[key]);
       },
-      
+
       _unregisterElement:function(type, key) {
         if (type in metaQueryElements) {
           if (key in metaQueryElements[type]) {

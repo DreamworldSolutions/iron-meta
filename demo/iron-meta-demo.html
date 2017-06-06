@@ -46,6 +46,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         The value(s) stored at type="type2" are: <b>[[metaQueryValue3]]</b>.
       </paper-card>
 
+      <iron-meta key="c" value="[[metaValue4]]"></iron-meta>
+
       <paper-card>
         <h2>Imperative Way in Attached</h2>
         <iron-meta type="type3" key="d" value="[[metaValue5]]"></iron-meta>
@@ -114,15 +116,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       registered: function(){
+        var self = this;
         var elMetaQuery4 = new Polymer.IronMetaQuery();
         document.querySelector('body').appendChild(elMetaQuery4);
 
         elMetaQuery4.set('key', 'c');
         console.log('Initial', elMetaQuery4.value);
-
+        self.metaQueryValue4 = elMetaQuery4.value;
 
         elMetaQuery4.addEventListener('value-changed', function(){
           console.log('change imperative', elMetaQuery4.value);
+          self.metaQueryValue4 = elMetaQuery4.value;
         });
       },
 
